@@ -46,7 +46,7 @@ Parameters:
     Default: "{{resolve:ssm:/rds_demo/master_username:1}}"
   DBPassword:
     Type: String
-    Default: "{{resolve:ssm:/rds_demo/master_password:1}}"
+    Default: "{{resolve:ssm-secure:/rds_demo/master_password:1}}"
     NoEcho: True
 Resources:
   VPC:
