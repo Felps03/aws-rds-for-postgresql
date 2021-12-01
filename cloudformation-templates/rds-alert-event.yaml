@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template deploys a RDS EventSubscription/SNS Alerts
+Parameters:
+  DBAlertEmail:
+    Type: String
+    Default: "{{resolve:ssm:/rds_demo/alert_email:1}}"
+Resources:
+  MyDBSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint:
+            Ref: DBAlertEmail
+          Protocol: email
+      TopicName: RDSAlertTopic
+  MyEventSubscription:
+    Type: AWS::RDS::EventSubscription
+    Properties:
+      Enabled: true
+      EventCategories:
+        - availability
+        - configuration change
+        - creation
+        - deletion
+        - failover
+        - failure
+        - recovery
+      SnsTopicArn:
+        Ref: MyDBSNSTopic
+      SourceType: db-instance

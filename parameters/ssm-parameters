@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Write RDS demo parameters to Parameter Store
+aws ssm put-parameter --cli-input-json '{"Name": "/rds_demo/db_name", "Value": "demo", "Type": "String"}' --description "Demo database name"
+aws ssm put-parameter --cli-input-json '{"Name": "/rds_demo/master_username", "Value": "masteruser", "Type": "String"}' --description "Master Username for database"
+aws ssm put-parameter --cli-input-json '{"Name": "/rds_demo/master_password", "Value": "5up3r53cr3tPa55w0rd", "Type": "String"}' --description "Master Password for database"
+aws ssm put-parameter --cli-input-json '{"Name": "/rds_demo/alert_email", "Value": "your@mail.com", "Type": "String"}' --description "RDS alert SMS email address"
+
+# Get parameters from Parameter Store
+aws ssm get-parameter --name " /rds_demo/db_name"
+aws ssm get-parameter --name " /rds_demo/master_username"
+aws ssm get-parameter --name " /rds_demo/master_password"
+aws ssm get-parameter --name " /rds_demo/alert_email"
