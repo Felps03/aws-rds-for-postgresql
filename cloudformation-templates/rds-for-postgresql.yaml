@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template deploys a VPC with a pair of subnets spread across two Availability Zones. It deploys an RDS PostgreSQL database.
+Description: This template deploys a VPC with a pair of subnets spread across two Availability Zones. It deploys an Internet Gateway, with a default route on the public subnets. It deploys an RDS PostgreSQL master and single read replica database.
 
 Parameters:
   VpcCIDR:
@@ -20,6 +20,9 @@ Parameters:
   DBInstanceIdentifier:
     Type: String
     Default: demo-instance
+  ReplicaInstanceIdentifier:
+    Type: String
+    Default: demo-replica
   DBEngine:
     Type: String
     Default: postgres
@@ -108,6 +111,11 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref SubnetMasterDB
+  SubnetReplicaRouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref SubnetReplicaDB
   DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -152,11 +160,30 @@ Resources:
         - !GetAtt VPC.DefaultSecurityGroup
       DBSubnetGroupName:
         Ref: DBSubnetGroup
+  DemoReadReplica:
+    Properties:
+      DBInstanceIdentifier:
+        Ref: ReplicaInstanceIdentifier
+      AllocatedStorage:
+        Ref: DBAllocatedStorage
+      DBInstanceClass:
+        Ref: DBInstanceClass
+      SourceDBInstanceIdentifier:
+        Ref: DemoMasterInstance
+      SourceRegion:
+        Ref: DBSourceRegion
+      Tags:
+        - Key: Project
+          Value: "Demo of RDS PostgreSQL"
+    Type: AWS::RDS::DBInstance
 
 Outputs:
   EndpointMaster:
     Description: Endpoint of the newly created RDS PostgreSQL master
     Value: !GetAtt DemoMasterInstance.Endpoint.Address
+  PortReadReplica:
+    Description: Endpoint of the newly created RDS PostgreSQL replica
+    Value: !GetAtt DemoReadReplica.Endpoint.Address
   PortDB:
     Description: Port of the newly created RDS PostgreSQL master
     Value: !GetAtt DemoMasterInstance.Endpoint.Port
